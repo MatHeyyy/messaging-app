@@ -20,4 +20,30 @@ public class Chat {
         this.participantName = participantName;
         this.messages = new ArrayList<>();
     }
+
+    // GETTERS
+    /**
+     * GET method for the latest message in the chat.
+     * @return a Message object representing the latest message in the chat, or null if there are no messages.
+     */
+    public Message getLatestMessage() {
+        if (messages.isEmpty()) {
+            return null;
+        }
+        return messages.get(messages.size() - 1);
+    }
+
+    /**
+     * GET method for participantName.
+     * @return a String representing the name of the participant in the chat.
+     */
+    public String getParticipantName() {return participantName;}
+
+    /**
+     * GET method for messages.
+     * @return a List of Message objects representing the messages exchanged in the chat.
+     */
+    public List<Message> getMessages() {return messages;}
+
+    // METHODS
 }
