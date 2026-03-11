@@ -46,4 +46,19 @@ public class Chat {
     public List<Message> getMessages() {return messages;}
 
     // METHODS
+
+    /**
+     * Method to add a message to the chat by appending it to the messages list.
+     * @param message a Message object representing the message to be added to the chat.
+     */
+    public void addMessage(Message message) {
+        messages.add(message);
+    }
+
+    /**
+     * Method to clear all messages from the chat by clearing the messages list.
+     */
+    public void clearChat() {
+        messages.clear();
+    }
 }
