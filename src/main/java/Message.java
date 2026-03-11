@@ -25,7 +25,7 @@ public class Message {
         this.isRead = false;
     }
 
-    // Getters
+    // GETTERS
 
     /**
      * GET method for senderName.
@@ -51,10 +51,18 @@ public class Message {
      */
     public boolean isRead() {return isRead;}
 
-    //Setters
-
+    // SETTERS
     /**
      * SET method to mark the message as read by setting the isRead field to true.
      */
     public void markAsRead() {this.isRead = true;}
+
+    /**
+     * Overrides the toString method to provide a string representation of the message, including the timestamp, sender name, content, and read status.
+     * @return a String representing the message in a readable format.
+     */
+    @Override
+    public String toString() {
+        return "[" + timestamp + "] " + senderName + ": " + content + (isRead ? " (read)" : " (unread)");
+    }
 }
