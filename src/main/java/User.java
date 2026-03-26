@@ -1,5 +1,6 @@
 /**
- * Represents the primary user of the application
+ * The User class represents a user in the messaging system. It contains information about the user's unique identifier,
+ * username, phone number, and profile picture.
  */
 public class User {
     private String userID;
