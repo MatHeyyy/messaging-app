@@ -34,4 +34,50 @@ public class Contact {
         this.profilePicture = "👤";
         this.dateAdded = LocalDateTime.now();
     }
+
+    // GETTERS
+
+    /**
+     * GET method for name.
+     * @return a String representing the name of the contact.
+     */
+    public String getName() {return name;}
+
+    /**
+     * GET method for phoneNumber.
+     * @return a String representing the phone number of the contact.
+     */
+    public String getPhoneNumber() {return phoneNumber;}
+
+    /**
+     * GET method for profilePicture.
+     * @return a String representing the profile picture of the contact, currently an emoji.
+     */
+    public String getProfilePicture() {return profilePicture;}
+
+    /**
+     * GET method for dateAdded.
+     * @return a LocalDateTime object representing the date and time when the contact was added.
+     */
+    public LocalDateTime getDateAdded() {return dateAdded;}
+
+     // SETTERS
+
+    /**
+     * SET method to set the name of the contact.
+     * @param name
+     */
+    public void setName(String name) {this.name = name;}
+
+    /**
+     * SET method to  set the phone number of the contact
+     * @param phoneNumber
+     */
+    public void setPhoneNumber(String phoneNumber) {this.phoneNumber = phoneNumber;}
+
+    /**
+     * SET method to set the profile picture
+     * @param profilePicture
+     */
+    public void setProfilePicture(String profilePicture) {this.profilePicture = profilePicture;}
 }
