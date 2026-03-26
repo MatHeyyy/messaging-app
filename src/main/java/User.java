@@ -1,6 +1,9 @@
 /**
  * The User class represents a user in the messaging system. It contains information about the user's unique identifier,
  * username, phone number, and profile picture.
+ *
+ * @author Matei Costinescu
+ * @version 1.0
  */
 public class User {
     private String userID;
