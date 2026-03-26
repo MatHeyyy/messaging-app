@@ -46,4 +46,30 @@ public class User {
      * @return a String representing the profile picture of the user, currently an emoji.
      */
     public String getProfilePicture() {return profilePicture;}
+
+    // SETTERS
+
+    /**
+     * SET method to set the userID of the user.
+     * @param userID
+     */
+    public void setUserID(String userID) {this.userID = userID;}
+
+    /**
+     * SET method to set the username of the user.
+     * @param username
+     */
+    public void setUsername(String username) {this.username = username;}
+
+    /**
+     * SET method to set the phone number of the user.
+     * @param phoneNumber
+     */
+    public void setPhoneNumber(String phoneNumber) {this.phoneNumber = phoneNumber;}
+
+    /**
+     * SET method to set the profile picture of the user.
+     * @param profilePicture
+     */
+    public void setProfilePicture(String profilePicture) {this.profilePicture = profilePicture;}
 }
