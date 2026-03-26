@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class ChatController {
     // Core data structures
-    private HashMap<String, User> contacts;
+    private HashMap<String, Contact> contacts;
     private HashMap<String, Chat> allChats;
 
     public ChatController() {
@@ -14,22 +14,23 @@ public class ChatController {
 
     // --- REQUIREMENT: View and manage contacts ---
     
-    public void addContact(User newContact) {
-        contacts.put(newContact.getUsername(), newContact);
+    public void addContact(Contact newContact)
+    {
+        contacts.put(newContact.getName(), newContact);
     }
 
-    public List<User> getAllContacts() {
+    public List<Contact> getAllContacts() {
         return new ArrayList<>(contacts.values());
     }
 
     // --- REQUIREMENT: Select from their 3 most recent chats ---
     
-    public List<Chat> getThreeRecentChats(User targetContact) {
+    public List<Chat> getThreeRecentChats(Contact targetContact) {
         List<Chat> relevantChats = new ArrayList<>();
 
         // Find all chats that involve this specific contact
         for (Chat chat : allChats.values()) {
-            if (chat.getContact().getUsername().equals(targetContact.getUsername())) {
+            if (chat.getParticipantName().equals(targetContact.getName())) {
                 relevantChats.add(chat);
             }
         }
