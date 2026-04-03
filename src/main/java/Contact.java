@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -6,7 +7,7 @@ import java.time.LocalDateTime;
  * @author Matei Costinescu
  * @version 1.0
  */
-public class Contact {
+public class Contact implements Serializable {
     private String name;
     private String phoneNumber;
     private String profilePicture;

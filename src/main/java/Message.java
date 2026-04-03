@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -7,7 +8,7 @@ import java.time.LocalDateTime;
  * @author Matei Costinescu
  * @version 1.0
  */
-public class Message {
+public class Message implements Serializable {
     private String senderName;
     private String content;
     private LocalDateTime timestamp;
