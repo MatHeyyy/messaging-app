@@ -12,6 +12,25 @@ public class ChatController {
         this.allChats = new HashMap<>();
     }
 
+
+    // SETTERS
+
+    /**
+     * SET method to load saved contacts
+     * @param loadedContacts
+     */
+    public void setContacts(HashMap<String, Contact> loadedContacts) {
+        this.contacts = loadedContacts;
+    }
+
+    /**
+     * SET method to load saved chats
+     * @param loadedChats
+     */
+    public void setAllChats(HashMap<String, Chat> loadedChats) {
+        this.allChats = loadedChats;
+    }
+
     // --- REQUIREMENT: View and manage contacts ---
     
     public void addContact(Contact newContact)
