@@ -2,76 +2,109 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * ChatController manages all chat and contact operations for the messaging application.
+ * Handles user profiles, contact management, chat operations, and message searching.
+ */
 public class ChatController {
     private HashMap<String, Contact> contacts;
     private HashMap<String, Chat> allChats;
     private User currentUser;
 
+    /**
+     * Constructs a new ChatController with empty contact and chat collections.
+     */
     public ChatController() {
         this.contacts = new HashMap<>();
         this.allChats = new HashMap<>();
     }
 
-
-    // SETTERS
+    // ========== DATA LOADING ==========
 
     /**
-     * SET method to load saved contacts
-     * @param loadedContacts
+     * Loads previously saved contacts into the controller.
+     *
+     * @param loadedContacts a HashMap of contacts to be loaded
      */
     public void setContacts(HashMap<String, Contact> loadedContacts) {
         this.contacts = loadedContacts;
     }
 
     /**
-     * SET method to load saved chats
-     * @param loadedChats
+     * Loads previously saved chats into the controller.
+     *
+     * @param loadedChats a HashMap of chats to be loaded
      */
     public void setAllChats(HashMap<String, Chat> loadedChats) {
         this.allChats = loadedChats;
     }
 
-    // ==========================================
-    // EDITING PROFILE
-    // ==========================================
-    
+    // ========== PROFILE MANAGEMENT ==========
+
+    /**
+     * Sets the current logged-in user.
+     *
+     * @param user the User object to set as current user
+     */
     public void setCurrentUser(User user) {
         this.currentUser = user;
     }
 
+    /**
+     * Gets the current logged-in user.
+     *
+     * @return the current User, or null if no user is logged in
+     */
     public User getCurrentUser() {
         return this.currentUser;
     }
 
+    /**
+     * Edits the current user's profile information.
+     * Non-empty parameters will update the corresponding user field.
+     *
+     * @param newUsername    the new username (skipped if null or empty)
+     * @param newPhoneNumber the new phone number (skipped if null or empty)
+     * @param newProfilePic  the new profile picture path (skipped if null or empty)
+     */
     public void editProfile(String newUsername, String newPhoneNumber, String newProfilePic) {
         if (this.currentUser != null) {
             if (newUsername != null && !newUsername.trim().isEmpty()) {
-                this.currentUser.setUsername(newUsername); // Assumes User has setUsername()
+                this.currentUser.setUsername(newUsername);
             }
             if (newPhoneNumber != null && !newPhoneNumber.trim().isEmpty()) {
-                this.currentUser.setPhoneNumber(newPhoneNumber); // Assumes User has setPhoneNumber()
+                this.currentUser.setPhoneNumber(newPhoneNumber);
             }
             if (newProfilePic != null && !newProfilePic.trim().isEmpty()) {
-                this.currentUser.setProfilePicture(newProfilePic); // Assumes User has setProfilePicture()
+                this.currentUser.setProfilePicture(newProfilePic);
             }
         }
     }
 
-    // ==========================================
-    // REQUIREMENT: View and manage contacts
-    // ==========================================
+    // ========== CONTACT MANAGEMENT ==========
 
+    /**
+     * Adds a new contact to the contacts list.
+     *
+     * @param newContact the Contact object to add
+     */
     public void addContact(Contact newContact) {
         contacts.put(newContact.getName(), newContact);
     }
 
+    /**
+     * Gets all contacts in the system.
+     *
+     * @return a list of all Contact objects
+     */
     public List<Contact> getAllContacts() {
         return new ArrayList<>(contacts.values());
     }
 
     /**
-     * Method to sort the list of contacts in alphabetical order
-     * @return A list of contacts in alphabetical order
+     * Gets all contacts sorted alphabetically by name (case-insensitive).
+     *
+     * @return a list of contacts in alphabetical order
      */
     public List<Contact> getContactsAlphabetically() {
         List<Contact> sortedList = new ArrayList<>(contacts.values());
@@ -80,66 +113,98 @@ public class ChatController {
     }
 
     /**
-     * Method to sort the list of contacts by the date they were added,
-     * with the most recently added contacts appearing first
-     * @return A list of contacts in order of newest to oldest based on the date they were added
+     * Gets all contacts sorted by date added, with most recent first.
+     *
+     * @return a list of contacts ordered by date added (newest to oldest)
      */
-    public List<Contact> getContactsByRecentlyAdded(){
+    public List<Contact> getContactsByRecentlyAdded() {
         List<Contact> sortedList = new ArrayList<>(contacts.values());
         sortedList.sort((c1, c2) -> c2.getDateAdded().compareTo(c1.getDateAdded()));
         return sortedList;
     }
 
-    // Find a specific contact by name
+    /**
+     * Retrieves a specific contact by name.
+     *
+     * @param name the contact's name
+     * @return the Contact object if found, null otherwise
+     */
     public Contact getContact(String name) {
         return contacts.get(name);
     }
 
-    // ==========================================
-    // REQUIREMENT: Select from their 3 most recent chats
-    // ==========================================
-    
+    /**
+     * Removes a contact from the contacts list.
+     *
+     * @param contactName the name of the contact to remove
+     */
+    public void removeContact(String contactName) {
+        contacts.remove(contactName);
+    }
+
+    // ========== CHAT MANAGEMENT ==========
+
+    /**
+     * Opens a chat by its ID.
+     *
+     * @param chatId the unique identifier of the chat
+     * @return the Chat object if found, null otherwise
+     */
+    public Chat openChat(String chatId) {
+        return allChats.get(chatId);
+    }
+
+    /**
+     * Gets the three most recent chats with a specific contact.
+     * Chats are sorted by the timestamp of their last message, with newest first.
+     *
+     * @param targetContact the contact to find recent chats with
+     * @return a list of up to three recent Chat objects
+     */
     public List<Chat> getThreeRecentChats(Contact targetContact) {
         List<Chat> relevantChats = new ArrayList<>();
 
-        // Find all chats that involve this specific contact
         for (Chat chat : allChats.values()) {
             if (chat.getParticipantName().equals(targetContact.getName())) {
                 relevantChats.add(chat);
             }
         }
 
-        // Sort these chats by the timestamp of their LAST message
         relevantChats.sort((chat1, chat2) -> {
-            // Safety check: if a chat has no messages, push it to the bottom
             if (chat1.getMessages().isEmpty()) return 1;
             if (chat2.getMessages().isEmpty()) return -1;
 
-            // Get the last message in both chats
             Message lastMsg1 = chat1.getMessages().get(chat1.getMessages().size() - 1);
             Message lastMsg2 = chat2.getMessages().get(chat2.getMessages().size() - 1);
 
-            // Compare the timestamps. 
-            // Use time2.compareTo(time1) to sort in DESCENDING order (newest first)
             return lastMsg2.getTimestamp().compareTo(lastMsg1.getTimestamp());
         });
 
-        // Step 3: Return only the top 3 (or fewer if they only have 1 or 2 chats)
         if (relevantChats.size() > 3) {
-            return relevantChats.subList(0, 3); // Returns index 0, 1, and 2
+            return relevantChats.subList(0, 3);
         }
-        
+
         return relevantChats;
     }
 
-    // ==========================================
-    // REQUIREMENT: Opening a chat to view and add to it
-    // ==========================================
-    
-    public Chat openChat(String chatId) {
-        return allChats.get(chatId);
+    /**
+     * Deletes a chat from the system.
+     *
+     * @param chatId the unique identifier of the chat to delete
+     */
+    public void deleteChat(String chatId) {
+        allChats.remove(chatId);
     }
 
+    // ========== MESSAGING ==========
+
+    /**
+     * Adds a new message to a specific chat.
+     *
+     * @param chatId   the unique identifier of the chat
+     * @param senderName the name of the message sender
+     * @param text     the content of the message
+     */
     public void addMessageToChat(String chatId, String senderName, String text) {
         Chat chat = allChats.get(chatId);
         if (chat != null) {
@@ -148,10 +213,13 @@ public class ChatController {
         }
     }
 
-    // ==========================================
-    // SEARCHING FOR CHATS
-    // ==========================================
-
+    /**
+     * Searches all messages across all chats for a keyword.
+     * The search is case-insensitive.
+     *
+     * @param keyword the search term to look for in message content
+     * @return a list of Message objects containing the keyword
+     */
     public List<Message> searchAllChats(String keyword) {
         List<Message> searchResults = new ArrayList<>();
         String searchTerm = keyword.toLowerCase();
@@ -164,26 +232,6 @@ public class ChatController {
             }
         }
         return searchResults;
-    }
-
-    // ==========================================
-    // REQUIREMENT: Delete chats
-    // ==========================================
-
-    /**
-     * Method to remove a chat from the allChats HashMap
-     * @param chatId
-     */
-    public void deleteChat(String chatId) {
-        allChats.remove(chatId);
-    }
-
-    /**
-     * Method to remove a contact from the contacts HashMap
-     * @param contactName
-     */
-    public void removeContact(String contactName){
-        contacts.remove(contactName);
     }
     
 }
