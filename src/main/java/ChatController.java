@@ -3,9 +3,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class ChatController {
-    // Core data structures
+
     private HashMap<String, Contact> contacts;
     private HashMap<String, Chat> allChats;
+    private User currentUser;
 
     public ChatController() {
         this.contacts = new HashMap<>();
@@ -31,10 +32,37 @@ public class ChatController {
         this.allChats = loadedChats;
     }
 
-    // --- REQUIREMENT: View and manage contacts ---
+    // ==========================================
+    // EDITING PROFILE
+    // ==========================================
     
-    public void addContact(Contact newContact)
-    {
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
+
+    public User getCurrentUser() {
+        return this.currentUser;
+    }
+
+    public void editProfile(String newUsername, String newPhoneNumber, String newProfilePic) {
+        if (this.currentUser != null) {
+            if (newUsername != null && !newUsername.trim().isEmpty()) {
+                this.currentUser.setUsername(newUsername); // Assumes User has setUsername()
+            }
+            if (newPhoneNumber != null && !newPhoneNumber.trim().isEmpty()) {
+                this.currentUser.setPhoneNumber(newPhoneNumber); // Assumes User has setPhoneNumber()
+            }
+            if (newProfilePic != null && !newProfilePic.trim().isEmpty()) {
+                this.currentUser.setProfilePicture(newProfilePic); // Assumes User has setProfilePicture()
+            }
+        }
+    }
+
+    // ==========================================
+    // REQUIREMENT: View and manage contacts
+    // ==========================================
+
+    public void addContact(Contact newContact) {
         contacts.put(newContact.getName(), newContact);
     }
 
@@ -42,7 +70,14 @@ public class ChatController {
         return new ArrayList<>(contacts.values());
     }
 
-    // --- REQUIREMENT: Select from their 3 most recent chats ---
+    // Find a specific contact by name
+    public Contact getContact(String name) {
+        return contacts.get(name);
+    }
+
+    // ==========================================
+    // REQUIREMENT: Select from their 3 most recent chats
+    // ==========================================
     
     public List<Chat> getThreeRecentChats(Contact targetContact) {
         List<Chat> relevantChats = new ArrayList<>();
@@ -77,7 +112,9 @@ public class ChatController {
         return relevantChats;
     }
 
-    // --- REQUIREMENT: Opening a chat to view and add to it ---
+    // ==========================================
+    // REQUIREMENT: Opening a chat to view and add to it
+    // ==========================================
     
     public Chat openChat(String chatId) {
         return allChats.get(chatId);
@@ -91,7 +128,27 @@ public class ChatController {
         }
     }
 
-    // --- REQUIREMENT: Delete chats ---
+    // ==========================================
+    // SEARCHING FOR CHATS
+    // ==========================================
+
+    public List<Message> searchAllChats(String keyword) {
+        List<Message> searchResults = new ArrayList<>();
+        String searchTerm = keyword.toLowerCase();
+
+        for (Chat chat : allChats.values()) {
+            for (Message msg : chat.getMessages()) {
+                if (msg.getContent().toLowerCase().contains(searchTerm)) {
+                    searchResults.add(msg);
+                }
+            }
+        }
+        return searchResults;
+    }
+
+    // ==========================================
+    // REQUIREMENT: Delete chats
+    // ==========================================
     
     public void deleteChat(String chatId) {
         allChats.remove(chatId);
