@@ -3,7 +3,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class ChatController {
-
     private HashMap<String, Contact> contacts;
     private HashMap<String, Chat> allChats;
     private User currentUser;
@@ -68,6 +67,27 @@ public class ChatController {
 
     public List<Contact> getAllContacts() {
         return new ArrayList<>(contacts.values());
+    }
+
+    /**
+     * Method to sort the list of contacts in alphabetical order
+     * @return A list of contacts in alphabetical order
+     */
+    public List<Contact> getContactsAlphabetically() {
+        List<Contact> sortedList = new ArrayList<>(contacts.values());
+        sortedList.sort((c1, c2) -> c1.getName().compareToIgnoreCase(c2.getName()));
+        return sortedList;
+    }
+
+    /**
+     * Method to sort the list of contacts by the date they were added,
+     * with the most recently added contacts appearing first
+     * @return A list of contacts in order of newest to oldest based on the date they were added
+     */
+    public List<Contact> getContactsByRecentlyAdded(){
+        List<Contact> sortedList = new ArrayList<>(contacts.values());
+        sortedList.sort((c1, c2) -> c2.getDateAdded().compareTo(c1.getDateAdded()));
+        return sortedList;
     }
 
     // Find a specific contact by name
@@ -149,9 +169,21 @@ public class ChatController {
     // ==========================================
     // REQUIREMENT: Delete chats
     // ==========================================
-    
+
+    /**
+     * Method to remove a chat from the allChats HashMap
+     * @param chatId
+     */
     public void deleteChat(String chatId) {
         allChats.remove(chatId);
+    }
+
+    /**
+     * Method to remove a contact from the contacts HashMap
+     * @param contactName
+     */
+    public void removeContact(String contactName){
+        contacts.remove(contactName);
     }
     
 }
