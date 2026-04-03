@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class ChatController {
-    
+
     private HashMap<String, Contact> contacts;
     private HashMap<String, Chat> allChats;
     private User currentUser;
@@ -11,6 +11,25 @@ public class ChatController {
     public ChatController() {
         this.contacts = new HashMap<>();
         this.allChats = new HashMap<>();
+    }
+
+
+    // SETTERS
+
+    /**
+     * SET method to load saved contacts
+     * @param loadedContacts
+     */
+    public void setContacts(HashMap<String, Contact> loadedContacts) {
+        this.contacts = loadedContacts;
+    }
+
+    /**
+     * SET method to load saved chats
+     * @param loadedChats
+     */
+    public void setAllChats(HashMap<String, Chat> loadedChats) {
+        this.allChats = loadedChats;
     }
 
     // ==========================================
@@ -40,9 +59,9 @@ public class ChatController {
     }
 
     // ==========================================
-    // REQUIREMENT: View and manage contacts 
+    // REQUIREMENT: View and manage contacts
     // ==========================================
-    
+
     public void addContact(Contact newContact) {
         contacts.put(newContact.getName(), newContact);
     }
@@ -57,7 +76,7 @@ public class ChatController {
     }
 
     // ==========================================
-    // REQUIREMENT: Select from their 3 most recent chats 
+    // REQUIREMENT: Select from their 3 most recent chats
     // ==========================================
     
     public List<Chat> getThreeRecentChats(Contact targetContact) {
@@ -94,7 +113,7 @@ public class ChatController {
     }
 
     // ==========================================
-    // REQUIREMENT: Opening a chat to view and add to it 
+    // REQUIREMENT: Opening a chat to view and add to it
     // ==========================================
     
     public Chat openChat(String chatId) {
@@ -110,9 +129,9 @@ public class ChatController {
     }
 
     // ==========================================
-    // SEARCHING FOR CHATS 
+    // SEARCHING FOR CHATS
     // ==========================================
-    
+
     public List<Message> searchAllChats(String keyword) {
         List<Message> searchResults = new ArrayList<>();
         String searchTerm = keyword.toLowerCase();
@@ -128,7 +147,7 @@ public class ChatController {
     }
 
     // ==========================================
-    // REQUIREMENT: Delete chats 
+    // REQUIREMENT: Delete chats
     // ==========================================
     
     public void deleteChat(String chatId) {

@@ -1,3 +1,7 @@
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+
 /**
  * The User class represents a user in the messaging system. It contains information about the user's unique identifier,
  * username, phone number, and profile picture.
@@ -5,7 +9,7 @@
  * @author Matei Costinescu
  * @version 1.0
  */
-public class User {
+public class User implements Serializable {
     private String userID;
     private String username;
     private String phoneNumber;
@@ -40,7 +44,7 @@ public class User {
     public String getUsername() {return username;}
 
     /**
-     * GET method for phpneNumber
+     * GET method for phoneNumber
      * @return a String representing the phone number of the user.
      */
     public String getPhoneNumber() {return phoneNumber;}
