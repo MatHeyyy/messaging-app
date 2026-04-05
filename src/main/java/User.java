@@ -1,5 +1,5 @@
 import java.io.Serializable;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
 
 
 /**
@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
  * @version 1.0
  */
 public class User implements Serializable {
+	private static final long serialVersionUID = 1L;
     private String userID;
     private String username;
     private String phoneNumber;

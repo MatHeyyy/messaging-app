@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
  * @version 1.0
  */
 public class Contact implements Serializable {
+	private static final long serialVersionUID = 1L;
     private String name;
     private String phoneNumber;
     private String profilePicture;

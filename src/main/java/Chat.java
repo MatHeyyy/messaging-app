@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
 
 /**
  * The Chat class represents a conversation between two users in the messaging system.
@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
  * @version 1.0
  */
 public class Chat implements Serializable {
+	private static final long serialVersionUID = 1L;
     private String participantName;
     private List<Message> messages;
 

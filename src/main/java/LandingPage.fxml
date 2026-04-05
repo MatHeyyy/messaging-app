@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="LandingPageController"
+            prefWidth="950" prefHeight="650">
+
+    <top>
+        <HBox style="-fx-background-color: #202C33; -fx-padding: 12 20;">
+            <Label text="ChatApp" style="-fx-text-fill: white; -fx-font-size: 22; -fx-font-weight: bold;" />
+            <HBox spacing="10" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                <Label fx:id="profileName" style="-fx-text-fill: white; -fx-font-size: 16;" />
+                <Button text="Edit Profile" fx:id="editProfileBtn" style="-fx-background-color: #00BFFF; -fx-text-fill: white;" />
+            </HBox>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox style="-fx-background-color: #2A3942; -fx-padding: 15;" spacing="10" prefWidth="220">
+            <Button text="🏠 Home" prefWidth="200" />
+            <Button text="💬 Chats" prefWidth="200" fx:id="chatsBtn" />
+            <Button text="👥 Contacts" prefWidth="200" fx:id="contactsBtn" />
+            <Button text="⭐ New Chat" prefWidth="200" style="-fx-background-color: #00BFFF; -fx-text-fill: white;" fx:id="newChatBtn" />
+        </VBox>
+    </left>
+
+    <center>
+        <VBox spacing="15" style="-fx-padding: 20;">
+            <TextField promptText="Search chats or messages..." fx:id="searchField" prefHeight="40" />
+            <Label text="Your 3 most recent chats" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <VBox fx:id="recentChatsContainer" spacing="10" />
+        </VBox>
+    </center>
+</BorderPane>
