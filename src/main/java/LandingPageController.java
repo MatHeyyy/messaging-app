@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -23,6 +24,7 @@ public class LandingPageController {
     @FXML private Button editProfileBtn;
     @FXML private Button chatsBtn;
     @FXML private Button contactsBtn;
+    @FXML private Button addContactBtn;
     @FXML private Button newChatBtn;
     @FXML private TextField searchField;
     @FXML private VBox recentChatsContainer;
@@ -46,6 +48,7 @@ public class LandingPageController {
 
         DataManager dm = new DataManager();
         dm.loadData(chatController);
+        ensureDefaultContacts();
 
         if (chatController.getCurrentUser() != null) {
             currentUsername = chatController.getCurrentUser().getUsername();
@@ -57,6 +60,7 @@ public class LandingPageController {
         editProfileBtn.setOnAction(e -> openEditProfileWindow());
         chatsBtn.setOnAction(e -> openAllChatsWindow());
         contactsBtn.setOnAction(e -> openContactsWindow());
+        addContactBtn.setOnAction(e -> openAddContactDialog());
         newChatBtn.setOnAction(e -> openNewChatWindow());
 
         searchField.setOnAction(e -> {
@@ -76,11 +80,26 @@ public class LandingPageController {
     private void loadRecentChatsByFrequency() {
         recentChatsContainer.getChildren().clear();
 
-        List<String> contacts = Arrays.asList("Alice Johnson", "Bob Smith", "Emma Davis");
+        List<Contact> contacts = chatController.getAllContacts();
+        contacts.sort((c1, c2) -> {
+            Integer firstCount = openFrequency.getOrDefault(c1.getName(), 0);
+            Integer secondCount = openFrequency.getOrDefault(c2.getName(), 0);
+            int frequencyCompare = secondCount.compareTo(firstCount);
+            if (frequencyCompare != 0) {
+                return frequencyCompare;
+            }
+            return c1.getName().compareToIgnoreCase(c2.getName());
+        });
 
-        contacts.sort((a, b) -> openFrequency.getOrDefault(b, 0).compareTo(openFrequency.getOrDefault(a, 0)));
+        if (contacts.isEmpty()) {
+            Label empty = new Label("No contacts yet. Add contacts to start chatting.");
+            empty.setStyle("-fx-text-fill: #A0A0A0; -fx-font-size: 14;");
+            recentChatsContainer.getChildren().add(empty);
+            return;
+        }
 
-        for (String contactName : contacts) {
+        for (Contact contact : contacts) {
+            String contactName = contact.getName();
             Button btn = new Button("Recent chat with " + contactName);
             btn.setPrefWidth(680);
             btn.setStyle("-fx-padding: 15; -fx-background-color: #2A3942; -fx-text-fill: white; -fx-font-size: 15;");
@@ -135,32 +154,35 @@ public class LandingPageController {
      * Opens a window listing all hard-coded chat entries.
      */
     private void openAllChatsWindow() {
+        Optional<String> sortChoice = chooseSortMode("Sort Chats");
+        if (sortChoice.isEmpty()) {
+            return;
+        }
+
         try {
             VBox vbox = new VBox(15);
             vbox.setStyle("-fx-padding: 20; -fx-background-color: #111B21;");
 
             Label title = new Label("All Chats");
             title.setStyle("-fx-font-size: 20; -fx-text-fill: white; -fx-font-weight: bold;");
-
-            Button chat1 = new Button("💬 Chat with Alice Johnson");
-            Button chat2 = new Button("💬 Chat with Bob Smith");
-            Button chat3 = new Button("💬 Chat with Emma Davis");
-
             String style = "-fx-background-color: #2A3942; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 15 30; -fx-background-radius: 10;";
+            List<Contact> contacts = getContactsBySelection(sortChoice.get());
 
-            chat1.setStyle(style);
-            chat2.setStyle(style);
-            chat3.setStyle(style);
-
-            chat1.setPrefWidth(400);
-            chat2.setPrefWidth(400);
-            chat3.setPrefWidth(400);
-
-            chat1.setOnAction(e -> openChatWindow("Alice Johnson"));
-            chat2.setOnAction(e -> openChatWindow("Bob Smith"));
-            chat3.setOnAction(e -> openChatWindow("Emma Davis"));
-
-            vbox.getChildren().addAll(title, chat1, chat2, chat3);
+            vbox.getChildren().add(title);
+            if (contacts.isEmpty()) {
+                Label empty = new Label("No chats available. Add a contact to start.");
+                empty.setStyle("-fx-text-fill: #A0A0A0; -fx-font-size: 14;");
+                vbox.getChildren().add(empty);
+            } else {
+                for (Contact contact : contacts) {
+                    String contactName = contact.getName();
+                    Button chatButton = new Button("💬 Chat with " + contactName);
+                    chatButton.setStyle(style);
+                    chatButton.setPrefWidth(400);
+                    chatButton.setOnAction(e -> openChatWindow(contactName));
+                    vbox.getChildren().add(chatButton);
+                }
+            }
 
             Scene scene = new Scene(vbox, 450, 320);
             Stage stage = new Stage();
@@ -176,10 +198,37 @@ public class LandingPageController {
      * Shows the contacts information dialog.
      */
     private void openContactsWindow() {
+        if (chatController.getAllContacts().isEmpty()) {
+            Alert emptyAlert = new Alert(Alert.AlertType.INFORMATION);
+            emptyAlert.setTitle("Contacts");
+            emptyAlert.setHeaderText("Your Contacts");
+            emptyAlert.setContentText("No contacts available yet.");
+            emptyAlert.showAndWait();
+            return;
+        }
+
+        Optional<String> sortChoice = chooseSortMode("Sort Contacts");
+        if (sortChoice.isEmpty()) {
+            return;
+        }
+
+        List<Contact> sortedContacts = getContactsBySelection(sortChoice.get());
+        StringBuilder contactListText = new StringBuilder();
+        for (int i = 0; i < sortedContacts.size(); i++) {
+            Contact contact = sortedContacts.get(i);
+            contactListText
+                    .append(i + 1)
+                    .append(". ")
+                    .append(contact.getName())
+                    .append(" - ")
+                    .append(contact.getPhoneNumber())
+                    .append("\n");
+        }
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Contacts");
-        alert.setHeaderText("Your Contacts");
-        alert.setContentText("1. Alice Johnson\n2. Bob Smith\n3. Emma Davis");
+        alert.setHeaderText("Your Contacts (" + sortChoice.get() + ")");
+        alert.setContentText(contactListText.toString().trim());
         alert.showAndWait();
     }
 
@@ -187,10 +236,29 @@ public class LandingPageController {
      * Shows a contact picker dialog and opens the selected chat.
      */
     private void openNewChatWindow() {
-        ChoiceDialog<String> dialog = new ChoiceDialog<>("Alice Johnson",
-                "Alice Johnson", "Bob Smith", "Emma Davis");
+        Optional<String> sortChoice = chooseSortMode("Sort New Chat Contacts");
+        if (sortChoice.isEmpty()) {
+            return;
+        }
+
+        List<Contact> sortedContacts = getContactsBySelection(sortChoice.get());
+        if (sortedContacts.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("New Chat");
+            alert.setHeaderText("No contacts available");
+            alert.setContentText("Add contacts before starting a new chat.");
+            alert.showAndWait();
+            return;
+        }
+
+        List<String> contactNames = new ArrayList<>();
+        for (Contact contact : sortedContacts) {
+            contactNames.add(contact.getName());
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(contactNames.getFirst(), contactNames);
         dialog.setTitle("New Chat");
-        dialog.setHeaderText("Choose a contact to start a new chat with");
+        dialog.setHeaderText("Choose a contact to start a new chat with (" + sortChoice.get() + ")");
         dialog.setContentText("Select contact:");
 
         Optional<String> result = dialog.showAndWait();
@@ -221,5 +289,139 @@ public class LandingPageController {
                 profileNameLabel.setText("👤 " + name + " (" + currentStatus + ")");
             }
         }
+    }
+
+    /**
+     * Seeds the UI with demo contacts when no saved contacts are available.
+     */
+    private void ensureDefaultContacts() {
+        if (!chatController.getAllContacts().isEmpty()) {
+            return;
+        }
+
+        chatController.addContact(new Contact("Alice Johnson", "0700-111-222", "👩"));
+        chatController.addContact(new Contact("Bob Smith", "0700-333-444", "👨"));
+        chatController.addContact(new Contact("Emma Davis", "0700-555-666", "👩"));
+    }
+
+    /**
+     * Resolves a contact ordering strategy selected by the user.
+     *
+     * @param sortSelection selected sort option from the UI
+     * @return contacts ordered according to the selected option
+     */
+    private List<Contact> getContactsBySelection(String sortSelection) {
+        if ("Recently Added".equals(sortSelection)) {
+            return chatController.getContactsByRecentlyAdded();
+        }
+        return chatController.getContactsAlphabetically();
+    }
+
+    /**
+     * Opens a simple dialog flow that collects and adds a new contact.
+     */
+    private void openAddContactDialog() {
+        TextInputDialog nameDialog = new TextInputDialog();
+        nameDialog.setTitle("Add Contact");
+        nameDialog.setHeaderText("Create a new contact");
+        nameDialog.setContentText("Contact name:");
+
+        Optional<String> nameResult = nameDialog.showAndWait();
+        if (nameResult.isEmpty()) {
+            return;
+        }
+
+        String contactName = nameResult.get().trim();
+        if (contactName.isEmpty()) {
+            showInfo("Invalid input", "Contact name cannot be empty.");
+            return;
+        }
+
+        TextInputDialog phoneDialog = new TextInputDialog();
+        phoneDialog.setTitle("Add Contact");
+        phoneDialog.setHeaderText("Create a new contact");
+        phoneDialog.setContentText("Phone number:");
+
+        Optional<String> phoneResult = phoneDialog.showAndWait();
+        if (phoneResult.isEmpty()) {
+            return;
+        }
+
+        String phoneNumber = phoneResult.get().trim();
+        if (phoneNumber.isEmpty()) {
+            showInfo("Invalid input", "Phone number cannot be empty.");
+            return;
+        }
+
+        if (contactExists(contactName)) {
+            showInfo("Duplicate contact", "A contact with this name already exists.");
+            return;
+        }
+
+        TextInputDialog pictureDialog = new TextInputDialog("👤");
+        pictureDialog.setTitle("Add Contact");
+        pictureDialog.setHeaderText("Optional profile marker");
+        pictureDialog.setContentText("Emoji or picture marker:");
+
+        Optional<String> pictureResult = pictureDialog.showAndWait();
+        String picture = pictureResult.map(String::trim).filter(value -> !value.isEmpty()).orElse("👤");
+
+        chatController.addContact(new Contact(contactName, phoneNumber, picture));
+        loadRecentChatsByFrequency();
+        showInfo("Contact added", "Added contact: " + contactName);
+    }
+
+    /**
+     * Checks whether a contact name already exists (case-insensitive).
+     *
+     * @param name candidate contact name
+     * @return {@code true} if a matching contact exists
+     */
+    private boolean contactExists(String name) {
+        String normalizedInput = normalizeName(name);
+        for (Contact contact : chatController.getAllContacts()) {
+            if (normalizeName(contact.getName()).equals(normalizedInput)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Normalizes a contact name for case-insensitive comparisons.
+     *
+     * @param name raw contact name
+     * @return lowercase trimmed form
+     */
+    private String normalizeName(String name) {
+        return name.trim().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Shows a simple information alert.
+     *
+     * @param header alert header
+     * @param content alert content
+     */
+    private void showInfo(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Add Contact");
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    /**
+     * Prompts the user to choose a contact sort mode.
+     *
+     * @param title dialog window title
+     * @return selected sort mode, or empty when cancelled
+     */
+    private Optional<String> chooseSortMode(String title) {
+        ChoiceDialog<String> sortDialog = new ChoiceDialog<>("Alphabetical", "Alphabetical", "Recently Added");
+        sortDialog.setTitle(title);
+        sortDialog.setHeaderText("Choose how to sort contacts");
+        sortDialog.setContentText("Sort by:");
+        return sortDialog.showAndWait();
     }
 }
