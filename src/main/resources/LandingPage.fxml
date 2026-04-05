@@ -31,7 +31,7 @@
     <center>
         <VBox spacing="15" style="-fx-padding: 20;">
             <TextField promptText="Search chats or messages..." fx:id="searchField" prefHeight="40" />
-            <Label text="Your 3 most recent chats" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <Label fx:id="recentChatsTitleLabel" text="Your 3 most recent chats" style="-fx-font-size: 18; -fx-font-weight: bold;" />
             <VBox fx:id="recentChatsContainer" spacing="10" />
         </VBox>
     </center>

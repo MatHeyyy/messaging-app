@@ -27,6 +27,7 @@ public class LandingPageController {
     @FXML private Button addContactBtn;
     @FXML private Button newChatBtn;
     @FXML private TextField searchField;
+    @FXML private Label recentChatsTitleLabel;
     @FXML private VBox recentChatsContainer;
 
     private ChatController chatController;
@@ -38,6 +39,7 @@ public class LandingPageController {
 
     // Frequency counter for recent chats
     private final Map<String, Integer> openFrequency = new HashMap<>();
+    private String activeSearchQuery = "";
 
     /**
      * Initializes UI bindings, restores persisted data, and populates recent chats.
@@ -63,13 +65,11 @@ public class LandingPageController {
         addContactBtn.setOnAction(e -> openAddContactDialog());
         newChatBtn.setOnAction(e -> openNewChatWindow());
 
-        searchField.setOnAction(e -> {
-            String keyword = searchField.getText().trim();
-            if (!keyword.isEmpty()) {
-                var results = chatController.searchAllChats(keyword);
-                System.out.println("Found " + results.size() + " results for: " + keyword);
-            }
+        searchField.textProperty().addListener((obs, oldValue, newValue) -> {
+            activeSearchQuery = newValue == null ? "" : newValue.trim();
+            refreshSearchResults();
         });
+        searchField.setOnAction(e -> refreshSearchResults());
 
         loadRecentChatsByFrequency();
     }
@@ -78,8 +78,44 @@ public class LandingPageController {
      * Rebuilds the recent chat buttons sorted by open frequency.
      */
     private void loadRecentChatsByFrequency() {
-        recentChatsContainer.getChildren().clear();
+        refreshSearchResults();
+    }
 
+    /**
+     * Refreshes the center list using either recent chats or filtered search results.
+     */
+    private void refreshSearchResults() {
+        List<Contact> contacts = getContactsSortedByFrequency();
+        String query = activeSearchQuery.toLowerCase(Locale.ROOT);
+
+        if (query.isEmpty()) {
+            recentChatsTitleLabel.setText("Your 3 most recent chats");
+            renderRecentChatButtons(contacts);
+            return;
+        }
+
+        List<Contact> filteredContacts = new ArrayList<>();
+        for (Contact contact : contacts) {
+            String name = contact.getName().toLowerCase(Locale.ROOT);
+            String phone = contact.getPhoneNumber().toLowerCase(Locale.ROOT);
+            if (name.contains(query) || phone.contains(query)) {
+                filteredContacts.add(contact);
+            }
+        }
+
+        recentChatsTitleLabel.setText("Search results");
+        renderRecentChatButtons(filteredContacts);
+
+        int messageMatches = chatController.searchAllChats(activeSearchQuery).size();
+        Label messageResult = new Label("Matched messages: " + messageMatches);
+        messageResult.setStyle("-fx-text-fill: #6A6A6A; -fx-font-size: 12;");
+        recentChatsContainer.getChildren().add(messageResult);
+    }
+
+    /**
+     * Returns all contacts sorted by open frequency, then by name.
+     */
+    private List<Contact> getContactsSortedByFrequency() {
         List<Contact> contacts = chatController.getAllContacts();
         contacts.sort((c1, c2) -> {
             Integer firstCount = openFrequency.getOrDefault(c1.getName(), 0);
@@ -90,9 +126,22 @@ public class LandingPageController {
             }
             return c1.getName().compareToIgnoreCase(c2.getName());
         });
+        return contacts;
+    }
+
+    /**
+     * Renders recent chat buttons for the provided contact list.
+     *
+     * @param contacts contacts to display
+     */
+    private void renderRecentChatButtons(List<Contact> contacts) {
+        recentChatsContainer.getChildren().clear();
 
         if (contacts.isEmpty()) {
-            Label empty = new Label("No contacts yet. Add contacts to start chatting.");
+            String message = activeSearchQuery.isEmpty()
+                    ? "No contacts yet. Add contacts to start chatting."
+                    : "No contacts match your search.";
+            Label empty = new Label(message);
             empty.setStyle("-fx-text-fill: #A0A0A0; -fx-font-size: 14;");
             recentChatsContainer.getChildren().add(empty);
             return;
