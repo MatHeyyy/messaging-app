@@ -176,13 +176,21 @@ public class LandingPageController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatWindow.fxml"));
             Scene scene = new Scene(loader.load(), 700, 600);
 
+            String chatId = normalizeName(contactName);
+            Chat chat = chatController.getOrCreateChat(chatId, contactName);
+
             Stage stage = new Stage();
             stage.setTitle("Chat with " + contactName);
             stage.setScene(scene);
-            stage.show();
 
             ChatWindowController controller = loader.getController();
             controller.setChatTitle(contactName);
+            String senderName = currentUsername.isEmpty() ? "You" : currentUsername;
+            controller.setChatData(chat, senderName, this::persistData);
+
+            stage.setOnHidden(event -> persistData());
+            stage.show();
+            persistData();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

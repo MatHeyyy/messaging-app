@@ -20,6 +20,10 @@ public class ChatWindowController {
     @FXML private Button likeBtn;
     @FXML private ScrollPane scrollPane;
 
+    private Chat chat;
+    private String currentUsername = "You";
+    private Runnable onDataChanged;
+
     /**
      * Initializes event handlers and loads demo content for the chat view.
      */
@@ -38,21 +42,38 @@ public class ChatWindowController {
             System.out.println("User liked this chat!");
         });
 
-        // Load sample messages for demonstration
-        loadSampleMessages();
+        renderMessages();
     }
 
     /**
-     * Loads sample messages when the chat window opens.
+     * Binds this window to a chat model and persistence callback.
+     *
+     * @param chat chat model to render and mutate
+     * @param currentUsername sender label for current user messages
+     * @param onDataChanged callback invoked after message mutations
      */
-    private void loadSampleMessages() {
+    public void setChatData(Chat chat, String currentUsername, Runnable onDataChanged) {
+        this.chat = chat;
+        if (currentUsername != null && !currentUsername.trim().isEmpty()) {
+            this.currentUsername = currentUsername.trim();
+        }
+        this.onDataChanged = onDataChanged;
+        renderMessages();
+    }
+
+    /**
+     * Renders chat messages from the bound chat model.
+     */
+    private void renderMessages() {
         messageContainer.getChildren().clear();
 
-        addMessageBubble("Hello! How are you today?", false);
-        addMessageBubble("I'm doing great, thanks! And you?", true);
-        addMessageBubble("Everything is perfect! 😊", false);
+        if (chat != null) {
+            for (Message message : chat.getMessages()) {
+                boolean isMine = message.getSenderName().equalsIgnoreCase(currentUsername);
+                addMessageBubble(message.getContent(), isMine);
+            }
+        }
 
-        // Scroll to the bottom
         scrollPane.setVvalue(1.0);
     }
 
@@ -88,7 +109,13 @@ public class ChatWindowController {
         String text = messageField.getText().trim();
         if (text.isEmpty()) return;
 
-        // Show user's message as a blue bubble
+        if (chat == null) {
+            return;
+        }
+
+        chat.addMessage(new Message(currentUsername, text));
+        notifyDataChanged();
+
         addMessageBubble(text, true);
         messageField.clear();
         scrollPane.setVvalue(1.0);
@@ -97,10 +124,21 @@ public class ChatWindowController {
         new Thread(() -> {
             try { Thread.sleep(800); } catch (InterruptedException ignored) {}
             javafx.application.Platform.runLater(() -> {
+                chat.addMessage(new Message(chat.getParticipantName(), "Message received! 👍"));
+                notifyDataChanged();
                 addMessageBubble("Message received! 👍", false);
                 scrollPane.setVvalue(1.0);
             });
         }).start();
+    }
+
+    /**
+     * Executes persistence callback after data changes.
+     */
+    private void notifyDataChanged() {
+        if (onDataChanged != null) {
+            onDataChanged.run();
+        }
     }
     /**
      * Sets the chat header title for the selected contact.

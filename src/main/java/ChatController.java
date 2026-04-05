@@ -171,6 +171,17 @@ public class ChatController {
     }
 
     /**
+     * Returns an existing chat by id or creates one for a participant.
+     *
+     * @param chatId stable chat identifier key
+     * @param participantName display name of the chat participant
+     * @return existing or newly created chat
+     */
+    public Chat getOrCreateChat(String chatId, String participantName) {
+        return allChats.computeIfAbsent(chatId, key -> new Chat(participantName));
+    }
+
+    /**
      * Returns up to three most recent chats for a specific contact.
      *
      * <p>Chats without messages are treated as older than chats with messages.</p>

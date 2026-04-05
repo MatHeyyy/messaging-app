@@ -121,7 +121,7 @@ public class DataManager {
 
             System.out.println("Data loaded successfully from " + FILE_NAME);
             return "";
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | ClassCastException e) {
             System.out.println("Error loading data from " + e.getMessage());
             return "";
         }
