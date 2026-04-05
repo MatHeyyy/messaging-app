@@ -41,6 +41,24 @@ public class ChatController {
     }
 
     /**
+     * Returns a snapshot of the internal contact map for persistence.
+     *
+     * @return copy of contacts keyed by contact name
+     */
+    public HashMap<String, Contact> getContactsMap() {
+        return new HashMap<>(contacts);
+    }
+
+    /**
+     * Returns a snapshot of the internal chat map for persistence.
+     *
+     * @return copy of chats keyed by chat identifier
+     */
+    public HashMap<String, Chat> getAllChatsMap() {
+        return new HashMap<>(allChats);
+    }
+
+    /**
      * Sets the active user for profile operations.
      *
      * @param user user to mark as current; may be {@code null}

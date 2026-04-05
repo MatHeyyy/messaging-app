@@ -31,9 +31,11 @@ public class LandingPageController {
     @FXML private VBox recentChatsContainer;
 
     private ChatController chatController;
+    private DataManager dataManager;
 
     // Edit Profile updates
     private static Label profileNameLabel;
+    private static LandingPageController activeController;
     private static String currentUsername = "";
     private static String currentStatus = "";
 
@@ -46,11 +48,13 @@ public class LandingPageController {
      */
     @FXML
     public void initialize() {
+        activeController = this;
         chatController = new ChatController();
 
-        DataManager dm = new DataManager();
-        dm.loadData(chatController);
+        dataManager = new DataManager();
+        currentStatus = dataManager.loadData(chatController);
         ensureDefaultContacts();
+        ensureDefaultUser();
 
         if (chatController.getCurrentUser() != null) {
             currentUsername = chatController.getCurrentUser().getUsername();
@@ -72,6 +76,7 @@ public class LandingPageController {
         searchField.setOnAction(e -> refreshSearchResults());
 
         loadRecentChatsByFrequency();
+        persistData();
     }
 
     /**
@@ -323,6 +328,12 @@ public class LandingPageController {
     public static void updateProfile(String newName, String newStatus) {
         if (!newName.isEmpty()) currentUsername = newName;
         currentStatus = newStatus;
+
+        if (activeController != null) {
+            activeController.syncCurrentUserWithProfile();
+            activeController.persistData();
+        }
+
         updateProfileDisplay();
     }
 
@@ -351,6 +362,27 @@ public class LandingPageController {
         chatController.addContact(new Contact("Alice Johnson", "0700-111-222", "👩"));
         chatController.addContact(new Contact("Bob Smith", "0700-333-444", "👨"));
         chatController.addContact(new Contact("Emma Davis", "0700-555-666", "👩"));
+    }
+
+    /**
+     * Ensures a default user object exists so profile edits can be persisted.
+     */
+    private void ensureDefaultUser() {
+        if (chatController.getCurrentUser() != null) {
+            return;
+        }
+
+        String resolvedUsername = currentUsername.isEmpty() ? "Guest" : currentUsername;
+        User defaultUser = new User("local-user", resolvedUsername, "", "👤");
+        chatController.setCurrentUser(defaultUser);
+    }
+
+    /**
+     * Applies current static profile fields to the persisted user object.
+     */
+    private void syncCurrentUserWithProfile() {
+        ensureDefaultUser();
+        chatController.editProfile(currentUsername, null, null);
     }
 
     /**
@@ -417,6 +449,7 @@ public class LandingPageController {
 
         chatController.addContact(new Contact(contactName, phoneNumber, picture));
         loadRecentChatsByFrequency();
+        persistData();
         showInfo("Contact added", "Added contact: " + contactName);
     }
 
@@ -472,5 +505,12 @@ public class LandingPageController {
         sortDialog.setHeaderText("Choose how to sort contacts");
         sortDialog.setContentText("Sort by:");
         return sortDialog.showAndWait();
+    }
+
+    /**
+     * Saves the current landing-page state to disk.
+     */
+    private void persistData() {
+        dataManager.saveData(chatController, currentStatus);
     }
 }
