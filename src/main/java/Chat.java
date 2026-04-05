@@ -9,6 +9,9 @@ import java.io.Serializable;
 public class Chat implements Serializable {
 	private static final long serialVersionUID = 1L;
     private String participantName;
+    private String chatName;
+    private boolean groupChat;
+    private List<String> participants;
     private List<Message> messages;
 
     /**
@@ -18,6 +21,24 @@ public class Chat implements Serializable {
      */
     public Chat(String participantName) {
         this.participantName = participantName;
+        this.chatName = participantName;
+        this.groupChat = false;
+        this.participants = new ArrayList<>();
+        this.participants.add(participantName);
+        this.messages = new ArrayList<>();
+    }
+
+    /**
+     * Creates a group chat.
+     *
+     * @param chatName group display name
+     * @param participants group members by display name
+     */
+    public Chat(String chatName, List<String> participants) {
+        this.participantName = chatName;
+        this.chatName = chatName;
+        this.groupChat = true;
+        this.participants = new ArrayList<>(participants);
         this.messages = new ArrayList<>();
     }
 
@@ -40,6 +61,42 @@ public class Chat implements Serializable {
      * @return participant display name
      */
     public String getParticipantName() {return participantName;}
+
+    /**
+     * Returns the display name of the chat.
+     *
+     * @return display name used in chat lists and header
+     */
+    public String getChatName() {
+        if (chatName == null || chatName.isBlank()) {
+            return participantName;
+        }
+        return chatName;
+    }
+
+    /**
+     * Indicates whether this chat is a group chat.
+     *
+     * @return {@code true} for group chats
+     */
+    public boolean isGroupChat() {
+        return groupChat;
+    }
+
+    /**
+     * Returns the participant display names.
+     *
+     * @return mutable participant list
+     */
+    public List<String> getParticipants() {
+        if (participants == null) {
+            participants = new ArrayList<>();
+            if (participantName != null && !participantName.isBlank()) {
+                participants.add(participantName);
+            }
+        }
+        return participants;
+    }
 
     /**
      * Returns the backing message list for this chat.

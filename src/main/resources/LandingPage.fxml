@@ -24,6 +24,7 @@
             <Button text="💬 Chats" prefWidth="200" fx:id="chatsBtn" />
             <Button text="👥 Contacts" prefWidth="200" fx:id="contactsBtn" />
             <Button text="➕ Add Contact" prefWidth="200" fx:id="addContactBtn" />
+            <Button text="👨‍👩‍👧‍👦 New Group" prefWidth="200" fx:id="newGroupBtn" />
             <Button text="⭐ New Chat" prefWidth="200" style="-fx-background-color: #00BFFF; -fx-text-fill: white;" fx:id="newChatBtn" />
         </VBox>
     </left>

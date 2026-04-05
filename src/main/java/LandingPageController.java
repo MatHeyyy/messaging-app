@@ -4,9 +4,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -25,6 +29,7 @@ public class LandingPageController {
     @FXML private Button chatsBtn;
     @FXML private Button contactsBtn;
     @FXML private Button addContactBtn;
+    @FXML private Button newGroupBtn;
     @FXML private Button newChatBtn;
     @FXML private TextField searchField;
     @FXML private Label recentChatsTitleLabel;
@@ -67,6 +72,7 @@ public class LandingPageController {
         chatsBtn.setOnAction(e -> openAllChatsWindow());
         contactsBtn.setOnAction(e -> openContactsWindow());
         addContactBtn.setOnAction(e -> openAddContactDialog());
+        newGroupBtn.setOnAction(e -> openCreateGroupDialog());
         newChatBtn.setOnAction(e -> openNewChatWindow());
 
         searchField.textProperty().addListener((obs, oldValue, newValue) -> {
@@ -159,7 +165,7 @@ public class LandingPageController {
             btn.setStyle("-fx-padding: 15; -fx-background-color: #2A3942; -fx-text-fill: white; -fx-font-size: 15;");
             btn.setOnAction(e -> {
                 openFrequency.put(contactName, openFrequency.getOrDefault(contactName, 0) + 1);
-                openChatWindow(contactName);
+                openDirectChatWindow(contactName);
                 loadRecentChatsByFrequency();
             });
             recentChatsContainer.getChildren().add(btn);
@@ -167,24 +173,27 @@ public class LandingPageController {
     }
 
     /**
-     * Opens a new chat window and sets its title for the chosen contact.
+     * Opens a chat window for an existing chat id.
      *
-     * @param contactName contact display name shown in the chat header
+     * @param chatId existing chat identifier
      */
-    private void openChatWindow(String contactName) {
+    private void openChatWindow(String chatId) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatWindow.fxml"));
             Scene scene = new Scene(loader.load(), 700, 600);
 
-            String chatId = normalizeName(contactName);
-            Chat chat = chatController.getOrCreateChat(chatId, contactName);
+            Chat chat = chatController.openChat(chatId);
+            if (chat == null) {
+                return;
+            }
+            String chatName = chat.getChatName();
 
             Stage stage = new Stage();
-            stage.setTitle("Chat with " + contactName);
+            stage.setTitle("Chat with " + chatName);
             stage.setScene(scene);
 
             ChatWindowController controller = loader.getController();
-            controller.setChatTitle(contactName);
+            controller.setChatTitle(chatName);
             String senderName = currentUsername.isEmpty() ? "You" : currentUsername;
             controller.setChatData(chat, senderName, this::persistData);
 
@@ -194,6 +203,17 @@ public class LandingPageController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    /**
+     * Opens or creates a direct chat for a selected contact.
+     *
+     * @param contactName contact display name
+     */
+    private void openDirectChatWindow(String contactName) {
+        String chatId = buildDirectChatId(contactName);
+        chatController.getOrCreateChat(chatId, contactName);
+        openChatWindow(chatId);
     }
 
     /**
@@ -228,20 +248,24 @@ public class LandingPageController {
             Label title = new Label("All Chats");
             title.setStyle("-fx-font-size: 20; -fx-text-fill: white; -fx-font-weight: bold;");
             String style = "-fx-background-color: #2A3942; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 15 30; -fx-background-radius: 10;";
-            List<Contact> contacts = getContactsBySelection(sortChoice.get());
+            List<String> chatIds = getChatIdsBySelection(sortChoice.get());
 
             vbox.getChildren().add(title);
-            if (contacts.isEmpty()) {
+            if (chatIds.isEmpty()) {
                 Label empty = new Label("No chats available. Add a contact to start.");
                 empty.setStyle("-fx-text-fill: #A0A0A0; -fx-font-size: 14;");
                 vbox.getChildren().add(empty);
             } else {
-                for (Contact contact : contacts) {
-                    String contactName = contact.getName();
-                    Button chatButton = new Button("💬 Chat with " + contactName);
+                for (String chatId : chatIds) {
+                    Chat chat = chatController.openChat(chatId);
+                    if (chat == null) {
+                        continue;
+                    }
+                    String icon = chat.isGroupChat() ? "👥" : "💬";
+                    Button chatButton = new Button(icon + " Chat with " + chat.getChatName());
                     chatButton.setStyle(style);
                     chatButton.setPrefWidth(400);
-                    chatButton.setOnAction(e -> openChatWindow(contactName));
+                    chatButton.setOnAction(e -> openChatWindow(chatId));
                     vbox.getChildren().add(chatButton);
                 }
             }
@@ -324,7 +348,82 @@ public class LandingPageController {
         dialog.setContentText("Select contact:");
 
         Optional<String> result = dialog.showAndWait();
-        result.ifPresent(this::openChatWindow);
+        result.ifPresent(this::openDirectChatWindow);
+    }
+
+    /**
+     * Opens dialog flow for creating a new group chat.
+     */
+    private void openCreateGroupDialog() {
+        List<Contact> contacts = chatController.getContactsAlphabetically();
+        if (contacts.size() < 2) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("New Group");
+            alert.setHeaderText("Not enough contacts");
+            alert.setContentText("Add at least two contacts to create a group chat.");
+            alert.showAndWait();
+            return;
+        }
+
+        TextInputDialog nameDialog = new TextInputDialog("Friends Group");
+        nameDialog.setTitle("New Group");
+        nameDialog.setHeaderText("Create group chat");
+        nameDialog.setContentText("Group name:");
+
+        Optional<String> groupNameResult = nameDialog.showAndWait();
+        if (groupNameResult.isEmpty()) {
+            return;
+        }
+
+        String groupName = groupNameResult.get().trim();
+        if (groupName.isEmpty()) {
+            showInfo("Invalid input", "Group name cannot be empty.");
+            return;
+        }
+
+        Dialog<List<String>> membersDialog = new Dialog<>();
+        membersDialog.setTitle("New Group");
+        membersDialog.setHeaderText("Select group members");
+        ButtonType createBtn = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
+        membersDialog.getDialogPane().getButtonTypes().addAll(createBtn, ButtonType.CANCEL);
+
+        VBox box = new VBox(8);
+        List<CheckBox> checkBoxes = new ArrayList<>();
+        for (Contact contact : contacts) {
+            CheckBox checkBox = new CheckBox(contact.getName());
+            checkBoxes.add(checkBox);
+            box.getChildren().add(checkBox);
+        }
+        membersDialog.getDialogPane().setContent(box);
+
+        membersDialog.setResultConverter(button -> {
+            if (button != createBtn) {
+                return null;
+            }
+            List<String> selected = new ArrayList<>();
+            for (CheckBox checkBox : checkBoxes) {
+                if (checkBox.isSelected()) {
+                    selected.add(checkBox.getText());
+                }
+            }
+            return selected;
+        });
+
+        Optional<List<String>> selectedMembers = membersDialog.showAndWait();
+        if (selectedMembers.isEmpty()) {
+            return;
+        }
+
+        List<String> participants = selectedMembers.get();
+        if (participants.size() < 2) {
+            showInfo("Invalid selection", "Select at least two members.");
+            return;
+        }
+
+        String groupChatId = buildGroupChatId(groupName);
+        chatController.getOrCreateGroupChat(groupChatId, groupName, participants);
+        persistData();
+        openChatWindow(groupChatId);
     }
 
     /**
@@ -485,6 +584,66 @@ public class LandingPageController {
      */
     private String normalizeName(String name) {
         return name.trim().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Builds a stable id for a direct chat.
+     *
+     * @param contactName contact display name
+     * @return direct-chat id key
+     */
+    private String buildDirectChatId(String contactName) {
+        return "direct:" + normalizeName(contactName);
+    }
+
+    /**
+     * Builds a stable id for a group chat.
+     *
+     * @param groupName group display name
+     * @return group-chat id key
+     */
+    private String buildGroupChatId(String groupName) {
+        return "group:" + normalizeName(groupName);
+    }
+
+    /**
+     * Resolves chat ordering for the all-chats dialog.
+     *
+     * @param sortSelection selected sort option from the UI
+     * @return sorted chat id list
+     */
+    private List<String> getChatIdsBySelection(String sortSelection) {
+        List<String> chatIds = chatController.getAllChatIds();
+        if (!"Recently Added".equals(sortSelection)) {
+            chatIds.sort((id1, id2) -> {
+                Chat first = chatController.openChat(id1);
+                Chat second = chatController.openChat(id2);
+                String firstName = first == null ? "" : first.getChatName();
+                String secondName = second == null ? "" : second.getChatName();
+                return firstName.compareToIgnoreCase(secondName);
+            });
+            return chatIds;
+        }
+
+        chatIds.sort((id1, id2) -> Long.compare(getLastMessageEpochMillis(id2), getLastMessageEpochMillis(id1)));
+        return chatIds;
+    }
+
+    /**
+     * Returns last message timestamp used for recent ordering.
+     *
+     * @param chatId chat identifier
+     * @return epoch millis or 0 when chat has no messages
+     */
+    private long getLastMessageEpochMillis(String chatId) {
+        Chat chat = chatController.openChat(chatId);
+        if (chat == null || chat.getLatestMessage() == null) {
+            return 0L;
+        }
+        return chat.getLatestMessage().getTimestamp()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
     }
 
     /**

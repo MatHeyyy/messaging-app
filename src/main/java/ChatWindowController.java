@@ -124,12 +124,38 @@ public class ChatWindowController {
         new Thread(() -> {
             try { Thread.sleep(800); } catch (InterruptedException ignored) {}
             javafx.application.Platform.runLater(() -> {
-                chat.addMessage(new Message(chat.getParticipantName(), "Message received! 👍"));
+                String sender = getSimulatedIncomingSender();
+                String incomingText = chat.isGroupChat()
+                        ? sender + ": Message received! 👍"
+                        : "Message received! 👍";
+                chat.addMessage(new Message(sender, incomingText));
                 notifyDataChanged();
-                addMessageBubble("Message received! 👍", false);
+                addMessageBubble(incomingText, false);
                 scrollPane.setVvalue(1.0);
             });
         }).start();
+    }
+
+    /**
+     * Picks a sender name used for simulated incoming messages.
+     *
+     * @return selected sender display name
+     */
+    private String getSimulatedIncomingSender() {
+        if (chat == null) {
+            return "Friend";
+        }
+
+        if (chat.isGroupChat()) {
+            for (String participant : chat.getParticipants()) {
+                if (!participant.equalsIgnoreCase(currentUsername)) {
+                    return participant;
+                }
+            }
+            return "Group member";
+        }
+
+        return chat.getParticipantName();
     }
 
     /**

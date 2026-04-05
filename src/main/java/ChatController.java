@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Coordinates in-memory chat, contact, and current-user operations.
@@ -179,6 +180,38 @@ public class ChatController {
      */
     public Chat getOrCreateChat(String chatId, String participantName) {
         return allChats.computeIfAbsent(chatId, key -> new Chat(participantName));
+    }
+
+    /**
+     * Returns an existing group chat by id or creates one.
+     *
+     * @param chatId stable group chat identifier
+     * @param groupName group display name
+     * @param participants participant names
+     * @return existing or newly created group chat
+     */
+    public Chat getOrCreateGroupChat(String chatId, String groupName, List<String> participants) {
+        return allChats.computeIfAbsent(chatId, key -> new Chat(groupName, participants));
+    }
+
+    /**
+     * Returns all chats currently known by the controller.
+     *
+     * @return list of chats in unspecified order
+     */
+    public List<Chat> getAllChats() {
+        return new ArrayList<>(allChats.values());
+    }
+
+    /**
+     * Returns a stable sorted list of all chat ids.
+     *
+     * @return chat ids sorted alphabetically
+     */
+    public List<String> getAllChatIds() {
+        List<String> ids = new ArrayList<>(allChats.keySet());
+        Collections.sort(ids);
+        return ids;
     }
 
     /**
