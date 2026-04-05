@@ -3,8 +3,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * JavaFX application entry point that loads the landing page UI.
+ */
 public class MainApp extends Application {
 
+    /**
+     * Creates and shows the primary stage containing the landing page scene.
+     *
+     * @param primaryStage primary JavaFX window provided by the runtime
+     * @throws Exception when the FXML resource cannot be loaded
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         // landing page
@@ -18,6 +27,11 @@ public class MainApp extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Launches the JavaFX application.
+     *
+     * @param args command-line arguments passed to the JavaFX launcher
+     */
     public static void main(String[] args) {
         launch(args);
     }

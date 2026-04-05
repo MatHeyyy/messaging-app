@@ -3,16 +3,19 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * ChatController manages all chat and contact operations.
- * Handles user profiles, contact management, chat operations.
+ * Coordinates in-memory chat, contact, and current-user operations.
+ *
+ * <p>This controller acts as the application's central facade for profile updates,
+ * contact list management, chat retrieval, and message search.</p>
  */
 public class ChatController {
     private HashMap<String, Contact> contacts;
     private HashMap<String, Chat> allChats;
     private User currentUser;
 
-     //empty contact and chat collections.
-     
+    /**
+     * Creates a controller with empty contact and chat collections.
+     */
     public ChatController() {
         this.contacts = new HashMap<>();
         this.allChats = new HashMap<>();
@@ -20,42 +23,49 @@ public class ChatController {
 
     
     /**
-     * Loads previously saved contacts.
-     * @param loadedContacts a HashMap of contacts to be loaded
+     * Replaces the current contact map with previously loaded contacts.
+     *
+     * @param loadedContacts contacts keyed by contact name
      */
     public void setContacts(HashMap<String, Contact> loadedContacts) {
         this.contacts = loadedContacts;
     }
 
     /**
-     * Loads previously saved chats.     
-     * @param loadedChats a HashMap of chats to be loaded
+     * Replaces the current chat map with previously loaded chats.
+     *
+     * @param loadedChats chats keyed by chat identifier
      */
     public void setAllChats(HashMap<String, Chat> loadedChats) {
         this.allChats = loadedChats;
     }
 
     /**
-     * Sets the current user.     
-     * @param user the User object to set as current user
+     * Sets the active user for profile operations.
+     *
+     * @param user user to mark as current; may be {@code null}
      */
     public void setCurrentUser(User user) {
         this.currentUser = user;
     }
 
     /**
-     * Gets the current user.
-     * @return the current User, or null if no user 
+     * Returns the active user.
+     *
+     * @return current user, or {@code null} when none is set
      */
     public User getCurrentUser() {
         return this.currentUser;
     }
 
     /**
-     * Edits the current user's profile information.     
-     * @param newUsername    the new username 
-     * @param newPhoneNumber the new phone number 
-     * @param newProfilePic  the new profile picture path 
+     * Updates fields on the current user profile.
+     *
+     * <p>Each value is applied only when it is non-null and not blank.</p>
+     *
+     * @param newUsername new username value
+     * @param newPhoneNumber new phone number value
+     * @param newProfilePic new profile picture value
      */
     public void editProfile(String newUsername, String newPhoneNumber, String newProfilePic) {
         if (this.currentUser != null) {
@@ -73,24 +83,27 @@ public class ChatController {
 
     
     /**
-     * Adds a new contact to the contacts list.     
-     * @param newContact the Contact object to add
+     * Adds or replaces a contact keyed by contact name.
+     *
+     * @param newContact contact to store
      */
     public void addContact(Contact newContact) {
         contacts.put(newContact.getName(), newContact);
     }
 
     /**
-     * Gets all contacts in the system.     
-     * @return a list of all Contact objects
+     * Returns all known contacts.
+     *
+     * @return copy of contact values in unspecified order
      */
     public List<Contact> getAllContacts() {
         return new ArrayList<>(contacts.values());
     }
 
     /**
-     * Gets all contacts sorted alphabetically.     
-     * @return a list of contacts in alphabetical order
+     * Returns contacts sorted by name, case-insensitively.
+     *
+     * @return new list sorted alphabetically by contact name
      */
     public List<Contact> getContactsAlphabetically() {
         List<Contact> sortedList = new ArrayList<>(contacts.values());
@@ -99,8 +112,9 @@ public class ChatController {
     }
 
     /**
-     * Gets all contacts sorted by date added, with most recent first.     
-     * @return a list of contacts ordered by date added 
+     * Returns contacts sorted by creation time, newest first.
+     *
+     * @return new list ordered by descending {@link Contact#getDateAdded()}
      */
     public List<Contact> getContactsByRecentlyAdded() {
         List<Contact> sortedList = new ArrayList<>(contacts.values());
@@ -109,17 +123,19 @@ public class ChatController {
     }
 
     /**
-     * Retrieves a specific contact by name.     
-     * @param name the contact's name
-     * @return the Contact object if found, null otherwise
+     * Looks up a contact by exact name key.
+     *
+     * @param name contact name key
+     * @return matching contact, or {@code null} when absent
      */
     public Contact getContact(String name) {
         return contacts.get(name);
     }
 
     /**
-     * Removes a contact from the contacts list.     
-     * @param contactName the name of the contact to remove
+     * Removes a contact by name.
+     *
+     * @param contactName name key to remove
      */
     public void removeContact(String contactName) {
         contacts.remove(contactName);
@@ -127,19 +143,22 @@ public class ChatController {
 
     
     /**
-     * Opens a chat by its ID.
-     * @param chatId the unique identifier of the chat
-     * @return the Chat object if found, null otherwise
+     * Retrieves a chat by identifier.
+     *
+     * @param chatId chat identifier key
+     * @return matching chat, or {@code null} when absent
      */
     public Chat openChat(String chatId) {
         return allChats.get(chatId);
     }
 
     /**
-     * Gets the three most recent chats with a specific contact.
-     * Chats are sorted by the timestamp, newest first.     
-     * @param targetContact the contact to find recent chats
-     * @return a list of up to three recent chats
+     * Returns up to three most recent chats for a specific contact.
+     *
+     * <p>Chats without messages are treated as older than chats with messages.</p>
+     *
+     * @param targetContact contact whose chats should be considered
+     * @return list containing at most three chats ordered by latest message time
      */
     public List<Chat> getThreeRecentChats(Contact targetContact) {
         List<Chat> relevantChats = new ArrayList<>();
@@ -168,8 +187,9 @@ public class ChatController {
     }
 
     /**
-     * Deletes a chat from the system.     
-     * @param chatId the unique identifier of the chat to delete
+     * Removes a chat by identifier.
+     *
+     * @param chatId chat identifier key
      */
     public void deleteChat(String chatId) {
         allChats.remove(chatId);
@@ -177,11 +197,13 @@ public class ChatController {
 
     
     /**
-     * Adds a new message to a specific chat.
+     * Appends a new message to an existing chat.
      *
-     * @param chatId the unique identifier of the chat
-     * @param senderName the name of the message sender
-     * @param text the content of the message
+     * <p>If the chat does not exist, this method does nothing.</p>
+     *
+     * @param chatId chat identifier key
+     * @param senderName display name of the message sender
+     * @param text message body text
      */
     public void addMessageToChat(String chatId, String senderName, String text) {
         Chat chat = allChats.get(chatId);
@@ -192,10 +214,10 @@ public class ChatController {
     }
 
     /**
-     * Searches all messages across all chats for a keyword.
-     * The search is case insensitive.
-     * @param keyword the search term to look for
-     * @return a list of messages containing the keyword
+     * Searches message content across all chats using case-insensitive matching.
+     *
+     * @param keyword search term to find in message content
+     * @return list of matching messages; empty when no matches exist
      */
     public List<Message> searchAllChats(String keyword) {
         List<Message> searchResults = new ArrayList<>();

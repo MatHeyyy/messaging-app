@@ -6,10 +6,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
 /**
- * ChatWindowController - Controls the individual chat window.
- * UI/UX
- * Displays messages as bubbles, allows sending new messages.
- * Like chat button.
+ * Manages interactions inside a single chat window.
+ *
+ * <p>The controller renders simple message bubbles, handles send actions,
+ * and updates the window title based on the selected contact.</p>
  */
 public class ChatWindowController {
 
@@ -20,6 +20,9 @@ public class ChatWindowController {
     @FXML private Button likeBtn;
     @FXML private ScrollPane scrollPane;
 
+    /**
+     * Initializes event handlers and loads demo content for the chat view.
+     */
     @FXML
     public void initialize() {
     	likeBtn.setFocusTraversable(false);
@@ -54,7 +57,10 @@ public class ChatWindowController {
     }
 
     /**
-     * Adds a message bubble to the chat (blue for user, dark for friend).
+     * Adds a formatted message bubble to the chat transcript.
+     *
+     * @param text message text to render
+     * @param isMine {@code true} for current-user style, {@code false} for contact style
      */
     private void addMessageBubble(String text, boolean isMine) {
         Label bubble = new Label(text);
@@ -97,7 +103,9 @@ public class ChatWindowController {
         }).start();
     }
     /**
-     * Sets the chat title when opening from New Chat
+     * Sets the chat header title for the selected contact.
+     *
+     * @param contactName contact display name shown in the title
      */
     public void setChatTitle(String contactName) {
         chatTitle.setText("💬 " + contactName);

@@ -3,11 +3,7 @@ import java.io.Serializable;
 
 
 /**
- * The User class represents a user in the messaging system. It contains information about the user's unique identifier,
- * username, phone number, and profile picture.
- *
- * @author Matei Costinescu
- * @version 1.0
+ * Represents an application user profile.
  */
 public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -17,11 +13,12 @@ public class User implements Serializable {
     private String profilePicture; //For now will display just an emoji, to be extended for when GUI is implemented
 
     /**
-     * Constructor for User class.
-     * @param userID
-     * @param username
-     * @param phoneNumber
-     * @param profilePicture
+     * Creates a user profile with all persisted fields.
+     *
+     * @param userID unique user identifier
+     * @param username display name
+     * @param phoneNumber phone number
+     * @param profilePicture profile picture marker or path
      */
     public User(String userID, String username, String phoneNumber, String profilePicture) {
         this.userID = userID;
@@ -33,56 +30,69 @@ public class User implements Serializable {
     // GETTERS
 
     /**
-     * GET method for userID.
-     * @return a String representing the unique identifier of the user.
+     * Returns the unique user identifier.
+     *
+     * @return user ID
      */
     public String getUserID() {return userID;}
 
     /**
-     * GET method for username.
-     * @return a String representing the username of the user.
+     * Returns the username.
+     *
+     * @return display name
      */
     public String getUsername() {return username;}
 
     /**
-     * GET method for phoneNumber
-     * @return a String representing the phone number of the user.
+     * Returns the phone number.
+     *
+     * @return phone number string
      */
     public String getPhoneNumber() {return phoneNumber;}
 
     /**
-     * GET method for profilePicture
-     * @return a String representing the profile picture of the user, currently an emoji.
+     * Returns the profile picture marker.
+     *
+     * @return profile picture marker or path
      */
     public String getProfilePicture() {return profilePicture;}
 
     // SETTERS
 
     /**
-     * SET method to set the userID of the user.
-     * @param userID
+     * Updates the user ID.
+     *
+     * @param userID new user ID
      */
     public void setUserID(String userID) {this.userID = userID;}
 
     /**
-     * SET method to set the username of the user.
-     * @param username
+     * Updates the username.
+     *
+     * @param username new display name
      */
     public void setUsername(String username) {this.username = username;}
 
     /**
-     * SET method to set the phone number of the user.
-     * @param phoneNumber
+     * Updates the phone number.
+     *
+     * @param phoneNumber new phone number
      */
     public void setPhoneNumber(String phoneNumber) {this.phoneNumber = phoneNumber;}
 
     /**
-     * SET method to set the profile picture of the user.
-     * @param profilePicture
+     * Updates the profile picture marker.
+     *
+     * @param profilePicture new profile picture marker or path
      */
     public void setProfilePicture(String profilePicture) {this.profilePicture = profilePicture;}
 
 
+    /**
+     * Returns a compact profile summary string.
+     *
+     * @return formatted user string
+     */
     @Override
     public String toString() {
         return profilePicture + " " + username + " (ID: " + userID + "Phone: " + phoneNumber + ")";

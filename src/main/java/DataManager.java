@@ -2,18 +2,16 @@ import java.io.*;
 import java.util.HashMap;
 
 /**
- * This class saving and loading the application state to disk
- *
- * @author Matei Costinescu
- * @version 1.0
+ * Persists and restores application chat data from local disk.
  */
 public class DataManager {
     private static final String FILE_NAME = "chat_data.dat";
 
     /**
-     * Method to save the current contacts and chats to a file
-     * @param contacts
-     * @param allChats
+     * Saves contact and chat maps to the data file.
+     *
+     * @param contacts contacts keyed by contact name
+     * @param allChats chats keyed by chat identifier
      */
     public void saveData(HashMap<String, Contact> contacts, HashMap<String, Chat> allChats) {
         try (FileOutputStream fileOut = new FileOutputStream(FILE_NAME);
@@ -29,8 +27,11 @@ public class DataManager {
     }
 
     /**
-     * Method to load the contacts and chats from a file and set them in the ChatController
-     * @param controller
+     * Loads contacts and chats from disk into a controller instance.
+     *
+     * <p>If no data file exists, the method returns without modifying the controller.</p>
+     *
+     * @param controller destination controller that receives loaded maps
      */
     @SuppressWarnings("unchecked")
     public void loadData(ChatController controller) {

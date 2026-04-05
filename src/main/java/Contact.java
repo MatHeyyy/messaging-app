@@ -2,10 +2,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * The Contact class represents a contact that is added by the user to message.
- *
- * @author Matei Costinescu
- * @version 1.0
+ * Represents a saved contact that can be messaged by the user.
  */
 public class Contact implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -15,10 +12,11 @@ public class Contact implements Serializable {
     private LocalDateTime dateAdded;
 
     /**
-     * Primary Constructor for the Contact class
-     * @param name
-     * @param phoneNumber
-     * @param profilePicture
+     * Creates a contact with explicit profile picture information.
+     *
+     * @param name contact display name
+     * @param phoneNumber contact phone number
+     * @param profilePicture profile picture marker or path
      */
     public Contact(String name, String phoneNumber, String profilePicture) {
         this.name = name;
@@ -28,7 +26,10 @@ public class Contact implements Serializable {
     }
 
     /**
-     * Secondary Constructor for the Contact class for when the user provides no profile picture
+     * Creates a contact with a default profile picture marker.
+     *
+     * @param name contact display name
+     * @param phoneNumber contact phone number
      */
     public Contact(String name, String phoneNumber) {
         this.name = name;
@@ -40,49 +41,61 @@ public class Contact implements Serializable {
     // GETTERS
 
     /**
-     * GET method for name.
-     * @return a String representing the name of the contact.
+     * Returns the contact name.
+     *
+     * @return contact display name
      */
     public String getName() {return name;}
 
     /**
-     * GET method for phoneNumber.
-     * @return a String representing the phone number of the contact.
+     * Returns the contact phone number.
+     *
+     * @return phone number string
      */
     public String getPhoneNumber() {return phoneNumber;}
 
     /**
-     * GET method for profilePicture.
-     * @return a String representing the profile picture of the contact, currently an emoji.
+     * Returns the profile picture marker.
+     *
+     * @return profile picture marker or path
      */
     public String getProfilePicture() {return profilePicture;}
 
     /**
-     * GET method for dateAdded.
-     * @return a LocalDateTime object representing the date and time when the contact was added.
+     * Returns the timestamp when this contact was created.
+     *
+     * @return contact creation timestamp
      */
     public LocalDateTime getDateAdded() {return dateAdded;}
 
      // SETTERS
 
     /**
-     * SET method to set the name of the contact.
-     * @param name
+     * Updates the contact name.
+     *
+     * @param name new contact name
      */
     public void setName(String name) {this.name = name;}
 
     /**
-     * SET method to  set the phone number of the contact
-     * @param phoneNumber
+     * Updates the contact phone number.
+     *
+     * @param phoneNumber new phone number
      */
     public void setPhoneNumber(String phoneNumber) {this.phoneNumber = phoneNumber;}
 
     /**
-     * SET method to set the profile picture
-     * @param profilePicture
+     * Updates the contact profile picture marker.
+     *
+     * @param profilePicture new profile picture marker or path
      */
     public void setProfilePicture(String profilePicture) {this.profilePicture = profilePicture;}
 
+    /**
+     * Returns a compact contact summary string.
+     *
+     * @return formatted contact string
+     */
     @Override
     public String toString() {
         return profilePicture + " " + name + " (" + phoneNumber + ")";

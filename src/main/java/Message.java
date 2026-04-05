@@ -2,11 +2,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * The Message class represents a message sent from one user to another in the messaging system.
- * It contains information about the sender, content, timestamp, and read status of the message.
- *
- * @author Matei Costinescu
- * @version 1.0
+ * Represents a single chat message with sender metadata and read state.
  */
 public class Message implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -16,9 +12,10 @@ public class Message implements Serializable {
     private boolean isRead;
 
     /**
-     * Constructor for Message class.
-     * @param senderName
-     * @param content
+     * Creates a new unread message stamped with the current time.
+     *
+     * @param senderName sender display name
+     * @param content message body text
      */
     public Message(String senderName, String content) {
         this.senderName = senderName;
@@ -30,38 +27,43 @@ public class Message implements Serializable {
     // GETTERS
 
     /**
-     * GET method for senderName.
-     * @return a String representing the name of the sender of the message.
+     * Returns the sender display name.
+     *
+     * @return sender name
      */
     public String getSenderName() {return senderName;}
 
     /**
-     * GET method for content.
-     * @return a String representing the content of the message.
+     * Returns the message content.
+     *
+     * @return message body text
      */
     public String getContent() {return content;}
 
     /**
-     * GET method for timestamp.
-     * @return a LocalDateTime object representing the time when the message was created.
+     * Returns when this message was created.
+     *
+     * @return creation timestamp
      */
     public LocalDateTime getTimestamp() {return timestamp;}
 
     /**
-     * GET method for isRead.
-     * @return a boolean indicating whether the message has been read or not.
+     * Indicates whether the recipient has read this message.
+     *
+     * @return {@code true} when read, otherwise {@code false}
      */
     public boolean isRead() {return isRead;}
 
     // SETTERS
     /**
-     * SET method to mark the message as read by setting the isRead field to true.
+     * Marks this message as read.
      */
     public void markAsRead() {this.isRead = true;}
 
     /**
-     * Overrides the toString method to provide a string representation of the message, including the timestamp, sender name, content, and read status.
-     * @return a String representing the message in a readable format.
+     * Returns a log-like representation of this message.
+     *
+     * @return formatted message string with timestamp and read marker
      */
     @Override
     public String toString() {

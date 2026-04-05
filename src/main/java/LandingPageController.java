@@ -12,9 +12,10 @@ import javafx.stage.Stage;
 import java.util.*;
 
 /**
- * LandingPageController - Main landing page of the ChatApp.
- * UI/UX
- * Edit Profile, name and status.
+ * Controls the landing page view and top-level navigation actions.
+ *
+ * <p>This controller wires button actions, profile display state, chat search,
+ * and a simple recent-chat list ordered by how often each chat is opened.</p>
  */
 public class LandingPageController {
 
@@ -36,6 +37,9 @@ public class LandingPageController {
     // Frequency counter for recent chats
     private final Map<String, Integer> openFrequency = new HashMap<>();
 
+    /**
+     * Initializes UI bindings, restores persisted data, and populates recent chats.
+     */
     @FXML
     public void initialize() {
         chatController = new ChatController();
@@ -66,6 +70,9 @@ public class LandingPageController {
         loadRecentChatsByFrequency();
     }
 
+    /**
+     * Rebuilds the recent chat buttons sorted by open frequency.
+     */
     private void loadRecentChatsByFrequency() {
         recentChatsContainer.getChildren().clear();
 
@@ -86,6 +93,11 @@ public class LandingPageController {
         }
     }
 
+    /**
+     * Opens a new chat window and sets its title for the chosen contact.
+     *
+     * @param contactName contact display name shown in the chat header
+     */
     private void openChatWindow(String contactName) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatWindow.fxml"));
@@ -103,6 +115,9 @@ public class LandingPageController {
         }
     }
 
+    /**
+     * Opens the edit-profile dialog window.
+     */
     private void openEditProfileWindow() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("EditProfile.fxml"));
@@ -116,6 +131,9 @@ public class LandingPageController {
         }
     }
 
+    /**
+     * Opens a window listing all hard-coded chat entries.
+     */
     private void openAllChatsWindow() {
         try {
             VBox vbox = new VBox(15);
@@ -154,6 +172,9 @@ public class LandingPageController {
         }
     }
 
+    /**
+     * Shows the contacts information dialog.
+     */
     private void openContactsWindow() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Contacts");
@@ -162,6 +183,9 @@ public class LandingPageController {
         alert.showAndWait();
     }
 
+    /**
+     * Shows a contact picker dialog and opens the selected chat.
+     */
     private void openNewChatWindow() {
         ChoiceDialog<String> dialog = new ChoiceDialog<>("Alice Johnson",
                 "Alice Johnson", "Bob Smith", "Emma Davis");
@@ -174,7 +198,10 @@ public class LandingPageController {
     }
 
     /**
-     * Updates username and status from Edit Profile window
+     * Updates the displayed profile information from the edit-profile dialog.
+     *
+     * @param newName new username value; ignored when empty
+     * @param newStatus new status text; may be empty
      */
     public static void updateProfile(String newName, String newStatus) {
         if (!newName.isEmpty()) currentUsername = newName;
@@ -182,6 +209,9 @@ public class LandingPageController {
         updateProfileDisplay();
     }
 
+    /**
+     * Refreshes the profile label text based on current static profile fields.
+     */
     private static void updateProfileDisplay() {
         if (profileNameLabel != null) {
             String name = currentUsername.isEmpty() ? "Guest" : currentUsername;

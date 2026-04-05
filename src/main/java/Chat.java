@@ -4,11 +4,7 @@ import java.io.Serializable;
 //import java.time.LocalDateTime;
 
 /**
- * The Chat class represents a conversation between two users in the messaging system.
- * It contains the name of the participant and a list of messages exchanged in the chat.
- *
- * @author Matei Costinescu
- * @version 1.0
+ * Represents a conversation thread with one participant and its message history.
  */
 public class Chat implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -16,8 +12,9 @@ public class Chat implements Serializable {
     private List<Message> messages;
 
     /**
-     * Constructor for Chat class.
-     * @param participantName a String representing the name of the participant in the chat.
+     * Creates a chat bound to a participant name.
+     *
+     * @param participantName participant display name for this chat
      */
     public Chat(String participantName) {
         this.participantName = participantName;
@@ -26,8 +23,9 @@ public class Chat implements Serializable {
 
     // GETTERS
     /**
-     * GET method for the latest message in the chat.
-     * @return a Message object representing the latest message in the chat, or null if there are no messages.
+     * Returns the latest message in the chat.
+     *
+     * @return most recent message, or {@code null} when the chat is empty
      */
     public Message getLatestMessage() {
         if (messages.isEmpty()) {
@@ -37,29 +35,32 @@ public class Chat implements Serializable {
     }
 
     /**
-     * GET method for participantName.
-     * @return a String representing the name of the participant in the chat.
+     * Returns the participant name associated with this chat.
+     *
+     * @return participant display name
      */
     public String getParticipantName() {return participantName;}
 
     /**
-     * GET method for messages.
-     * @return a List of Message objects representing the messages exchanged in the chat.
+     * Returns the backing message list for this chat.
+     *
+     * @return mutable list of messages in chronological insertion order
      */
     public List<Message> getMessages() {return messages;}
 
     // METHODS
 
     /**
-     * Method to add a message to the chat by appending it to the messages list.
-     * @param message a Message object representing the message to be added to the chat.
+     * Appends a message to the chat history.
+     *
+     * @param message message to append
      */
     public void addMessage(Message message) {
         messages.add(message);
     }
 
     /**
-     * Method to clear all messages from the chat by clearing the messages list.
+     * Removes all messages from this chat.
      */
     public void clearChat() {
         messages.clear();
